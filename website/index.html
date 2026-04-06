@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADSafetyPilot — AI-Powered AD Safety Engineering Copilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf9f5; --bg2: #f3f1eb; --text: #1a1a18; --text2: #5a5a52;
+  --text3: #8a8a80; --accent: #1e40af; --accent2: #c85a3a; --border: #e0ded6;
+  --card: #ffffff; --green: #059669; --amber: #d97706; --red: #dc2626;
+  --blue: #2563eb; --navy: #0f172a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif; color:var(--text); background:var(--bg); line-height:1.75; -webkit-font-smoothing:antialiased; }
+a { color:var(--accent2); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.wrap { max-width:1100px; margin:0 auto; padding:0 40px; }
+@media(max-width:640px) { .wrap { padding:0 20px; } }
+
+/* Language toggle */
+.lang { position:fixed; top:20px; right:40px; z-index:99; display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:rgba(250,249,245,0.92); backdrop-filter:blur(8px); }
+.lang button { padding:6px 14px; border:none; cursor:pointer; font-size:12px; font-weight:600; background:transparent; color:var(--text3); transition:.15s; font-family:inherit; }
+.lang button.on { background:var(--navy); color:white; }
+span.en, p.en, div.en, h1.en, h2.en, h3.en, li.en, td.en, th.en { display:none; }
+body.E span.cn, body.E p.cn, body.E div.cn, body.E h1.cn, body.E h2.cn, body.E h3.cn, body.E li.cn, body.E td.cn, body.E th.cn { display:none!important; }
+body.E span.en { display:inline!important; }
+body.E p.en, body.E div.en, body.E h1.en, body.E h2.en, body.E h3.en { display:block!important; }
+body.E li.en { display:list-item!important; }
+body.E td.en, body.E th.en { display:table-cell!important; }
+
+/* Header */
+header { background: linear-gradient(135deg, var(--navy) 0%, #1e293b 100%); color:white; padding:80px 20px 60px; text-align:center; }
+header h1 { font-family:'Playfair Display',Georgia,serif; font-size:clamp(2.4rem,5vw,3.6rem); font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+header h1 .highlight { color:#60a5fa; }
+header .subtitle { font-size:clamp(1rem,1.8vw,1.3rem); color:#94a3b8; max-width:750px; margin:0 auto 32px; }
+header .badges { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:28px; }
+.badge { padding:5px 14px; border-radius:20px; font-size:0.82em; font-weight:600; }
+.badge-blue { background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3); }
+.badge-green { background:rgba(34,197,94,0.15); color:#86efac; border:1px solid rgba(34,197,94,0.3); }
+.badge-orange { background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); }
+.badge-red { background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); }
+header .actions { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+.btn { display:inline-block; padding:12px 28px; border-radius:6px; font-size:1rem; font-weight:600; transition:.2s; font-family:inherit; text-decoration:none; }
+.btn-primary { background:var(--blue); color:white; }
+.btn-primary:hover { background:#1d4ed8; text-decoration:none; }
+.btn-ghost { border:1.5px solid rgba(255,255,255,0.3); color:white; }
+.btn-ghost:hover { border-color:rgba(255,255,255,0.6); text-decoration:none; }
+
+/* Stats */
+.stats { display:flex; justify-content:center; gap:48px; padding:32px 20px; background:white; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.stat { text-align:center; }
+.stat-num { font-size:2em; font-weight:800; color:var(--navy); }
+.stat-label { font-size:0.82em; color:var(--text3); margin-top:2px; }
+
+/* Sections */
+section { padding:56px 0; }
+section + section { border-top:1px solid var(--border); }
+.sec-title { font-family:'Playfair Display',Georgia,serif; font-size:2rem; font-weight:700; margin-bottom:8px; }
+.sec-sub { color:var(--text3); font-size:1.05rem; margin-bottom:28px; }
+
+/* Cards */
+.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:20px; }
+.card { background:var(--card); border-radius:10px; padding:28px; border:1px solid var(--border); transition:transform .2s, box-shadow .2s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,0.06); }
+.card-icon { font-size:1.8em; margin-bottom:10px; }
+.card h3 { font-size:1.1em; font-weight:700; margin-bottom:6px; }
+.card p { color:var(--text2); font-size:0.92em; }
+
+/* Pillar cards (Safety Trinity) */
+.pillars { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+@media(max-width:768px) { .pillars { grid-template-columns:1fr; } }
+.pillar { padding:24px; border-radius:10px; border-left:5px solid; }
+.pillar-fusa { background:#ecfdf5; border-color:var(--green); }
+.pillar-sotif { background:#eff6ff; border-color:var(--blue); }
+.pillar-cyber { background:#fef2f2; border-color:var(--red); }
+.pillar h3 { font-size:1.05em; font-weight:700; margin-bottom:6px; }
+.pillar p { font-size:0.9em; color:var(--text2); }
+
+/* Architecture diagram */
+.arch { display:flex; flex-direction:column; gap:8px; max-width:800px; margin:0 auto; }
+.arch-layer { padding:20px 24px; border-radius:8px; text-align:center; font-weight:600; font-size:0.95em; }
+.arch-l1 { background:#dbeafe; color:#1e3a5f; border:2px solid #93c5fd; }
+.arch-l2 { background:#fef3c7; color:#78350f; border:2px solid #fcd34d; }
+.arch-l3 { background:#d1fae5; color:#064e3b; border:2px solid #6ee7b7; }
+.arch-l4 { background:#e0e7ff; color:#312e81; border:2px solid #a5b4fc; }
+.arch-arrow { text-align:center; color:var(--text3); font-size:1.2em; }
+
+/* Scenario table */
+.sc-table { width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.sc-table th { background:var(--navy); color:white; padding:12px 14px; text-align:left; font-size:0.82em; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+.sc-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9; font-size:0.88em; }
+.sc-table tr:hover { background:#f8fafc; }
+.tag { padding:2px 8px; border-radius:4px; font-size:0.78em; font-weight:600; }
+.tag-jama { background:#dbeafe; color:#1e40af; }
+.tag-cn { background:#fee2e2; color:#991b1b; }
+.tag-both { background:#d1fae5; color:#065f46; }
+
+/* Roadmap */
+.roadmap { max-width:700px; }
+.rm-item { display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--border); }
+.rm-phase { min-width:80px; font-weight:700; font-size:0.9em; color:var(--accent); }
+.rm-done .rm-phase { color:var(--green); }
+.rm-content h4 { font-size:1em; margin-bottom:4px; }
+.rm-content p { font-size:0.88em; color:var(--text2); }
+.rm-status { font-size:0.82em; font-weight:600; }
+.status-done { color:var(--green); }
+.status-wip { color:var(--amber); }
+.status-plan { color:var(--text3); }
+
+/* Footer */
+footer { background:var(--navy); color:#94a3b8; padding:40px 20px; text-align:center; font-size:0.88em; }
+footer a { color:#60a5fa; }
+footer .author { color:white; font-weight:600; margin-bottom:4px; font-size:1em; }
+</style>
+</head>
+<body class="C">
+
+<!-- Language Toggle -->
+<div class="lang">
+  <button class="on" onclick="document.body.className='C';this.classList.add('on');this.nextElementSibling.classList.remove('on')">CN</button>
+  <button onclick="document.body.className='E';this.classList.add('on');this.previousElementSibling.classList.remove('on')">EN</button>
+</div>
+
+<!-- Header -->
+<header>
+  <h1>
+    <span class="cn"><span class="highlight">AD</span>SafetyPilot</span>
+    <h1 class="en"><span class="highlight">AD</span>SafetyPilot</h1>
+  </h1>
+  <p class="subtitle cn">智能驾驶安全开发助手 — 融合安全知识、中国标准与真实驾驶数据的AI Copilot</p>
+  <p class="subtitle en">AI-Powered AD Safety Engineering Copilot — Safety Knowledge + China Standards + Real Driving Data</p>
+  <div class="badges">
+    <span class="badge badge-blue">FuSa ISO 26262</span>
+    <span class="badge badge-green">SOTIF ISO 21448</span>
+    <span class="badge badge-red">CyberSec ISO 21434</span>
+    <span class="badge badge-orange">China GB Standards</span>
+  </div>
+  <div class="actions">
+    <a href="https://github.com/AutoZYX/ADSafetyPilot" class="btn btn-primary">GitHub</a>
+    <a href="#architecture" class="btn btn-ghost">
+      <span class="cn">了解架构</span><span class="en">Architecture</span>
+    </a>
+  </div>
+</header>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">3</div>
+    <div class="stat-label"><span class="cn">安全支柱</span><span class="en">Safety Pillars</span></div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">50+</div>
+    <div class="stat-label"><span class="cn">测试场景</span><span class="en">Test Scenarios</span></div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">750h+</div>
+    <div class="stat-label"><span class="cn">航测飞行时数</span><span class="en">Aerial Flight Hours</span></div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">10.5M+</div>
+    <div class="stat-label"><span class="cn">轨迹数据</span><span class="en">Trajectories</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- Why -->
+<section>
+  <h2 class="sec-title cn">为什么做这个项目?</h2>
+  <h2 class="sec-title en">Why ADSafetyPilot?</h2>
+  <p class="sec-sub cn">自动驾驶安全工程面临三个断裂：标准之间不互通、中国标准覆盖不足、缺乏真实数据支撑。</p>
+  <p class="sec-sub en">AD safety engineering faces three gaps: siloed standards, insufficient China coverage, and lack of real-world data grounding.</p>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🔗</div>
+      <h3><span class="cn">安全三支柱集成</span><span class="en">Safety Trinity Integration</span></h3>
+      <p class="cn">功能安全 (HARA) + 预期功能安全 (触发条件) + 网络安全 (TARA) 不再是三个独立的分析，而是交叉映射的统一流程。</p>
+      <p class="en">FuSa (HARA) + SOTIF (Triggering Conditions) + Cybersecurity (TARA) as one integrated analysis, not three separate silos.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🇨🇳</div>
+      <h3><span class="cn">中国标准深度覆盖</span><span class="en">China Standards Intelligence</span></h3>
+      <p class="cn">GB 44495 (L3) / GB 44496 (泊车) / 组合驾驶辅助安全要求 (L2) 等强制标准的完整覆盖，以及中国特有场景（非机动车混行、高密度加塞等）。</p>
+      <p class="en">Full coverage of GB 44495 (L3), GB 44496 (Parking), L2 ADAS mandatory standards, plus China-specific scenarios.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3><span class="cn">真实数据驱动</span><span class="en">Real Data Driven</span></h3>
+      <p class="cn">基于 <a href="https://www.driveresearch.tech/">DRIVEResearch</a> 750h+ 航测自然驾驶数据集，提供中国驾驶员行为参数基线（DFM），让安全分析有"数"可依。</p>
+      <p class="en">Grounded in <a href="https://www.driveresearch.tech/">DRIVEResearch</a> 750h+ aerial naturalistic driving data, providing Chinese Driver Foundation Model (DFM) baselines.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Safety Trinity -->
+<section>
+  <h2 class="sec-title cn">安全三支柱</h2>
+  <h2 class="sec-title en">Safety Trinity</h2>
+  <p class="sec-sub cn">三个安全领域的深度整合，而非简单并列。</p>
+  <p class="sec-sub en">Deep integration of three safety domains, not just side-by-side.</p>
+  <div class="pillars">
+    <div class="pillar pillar-fusa">
+      <h3>FuSa — ISO 26262</h3>
+      <p class="cn">HARA、ASIL分解、安全目标、安全机制设计。覆盖Part 3-11全生命周期。</p>
+      <p class="en">HARA, ASIL decomposition, safety goals, safety mechanisms. Full Part 3-11 lifecycle.</p>
+    </div>
+    <div class="pillar pillar-sotif">
+      <h3>SOTIF — ISO 21448</h3>
+      <p class="cn">触发条件分类、未知不安全场景识别、场景驱动V&V、SOTIF审核清单。这是我们最深的领域。</p>
+      <p class="en">Triggering condition taxonomy, unknown unsafe scenario identification, scenario-driven V&V, SOTIF audit. Our deepest domain.</p>
+    </div>
+    <div class="pillar pillar-cyber">
+      <h3>CyberSec — ISO 21434</h3>
+      <p class="cn">TARA威胁分析、安全启动、入侵检测、与功能安全的交互分析。</p>
+      <p class="en">TARA threat analysis, secure boot, intrusion detection, interaction with functional safety.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Architecture -->
+<section id="architecture">
+  <h2 class="sec-title cn">系统架构</h2>
+  <h2 class="sec-title en">Architecture</h2>
+  <p class="sec-sub cn">四层架构：基于通用大模型能力，叠加领域知识、场景库和真实数据。</p>
+  <p class="sec-sub en">Four layers: domain knowledge, scenario library, and real data on top of general LLM capabilities.</p>
+  <div class="arch">
+    <div class="arch-layer arch-l1">
+      <span class="cn">🗣️ 用户接口层 — CLI / Claude Code / IDE 集成</span>
+      <span class="en">🗣️ User Interface — CLI / Claude Code / IDE Integration</span>
+    </div>
+    <div class="arch-arrow">↕</div>
+    <div class="arch-layer arch-l2">
+      <span class="cn">🧠 安全智能体编排层 — Safety Trinity 联合分析 + 中国法规合规检查</span>
+      <span class="en">🧠 Safety Agent Orchestration — Safety Trinity Analysis + China Compliance</span>
+    </div>
+    <div class="arch-arrow">↕</div>
+    <div class="arch-layer arch-l3">
+      <span class="cn">📊 DFM 数据引擎 — 场景查询 / 行为分布 / 参数提取 / 基线对比</span>
+      <span class="en">📊 DFM Data Engine — Scenario Query / Behavior Distribution / Parameter Extraction</span>
+    </div>
+    <div class="arch-arrow">↕</div>
+    <div class="arch-layer arch-l4">
+      <span class="cn">🗄️ 知识与数据层 — 标准法规 + 场景库 (JAMA V4.0 × 中国标准) + DRIVEResearch 航测数据</span>
+      <span class="en">🗄️ Knowledge & Data — Standards + Scenarios (JAMA V4.0 x China) + DRIVEResearch Aerial Data</span>
+    </div>
+  </div>
+</section>
+
+<!-- Scenario Library -->
+<section>
+  <h2 class="sec-title cn">场景库（部分展示）</h2>
+  <h2 class="sec-title en">Scenario Library (Preview)</h2>
+  <p class="sec-sub cn">基于 JAMA V4.0 安全评价框架，对标中国 L2 组合驾驶辅助系统安全要求，面向标准合规。</p>
+  <p class="sec-sub en">Based on JAMA V4.0 safety evaluation framework, mapped to Chinese L2 ADAS mandatory standards.</p>
+  <div style="overflow-x:auto;">
+  <table class="sc-table">
+    <thead><tr>
+      <th>ID</th>
+      <th><span class="cn">场景</span><span class="en">Scenario</span></th>
+      <th><span class="cn">来源</span><span class="en">Source</span></th>
+      <th><span class="cn">安全域</span><span class="en">Safety</span></th>
+      <th><span class="cn">数据状态</span><span class="en">Data</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td>SC-01</td><td><span class="cn">高速跟车（稳态）</span><span class="en">Highway Car-Following (Steady)</span></td><td><span class="tag tag-both">JAMA+CN</span></td><td>FuSa+SOTIF</td><td><span class="status-wip">Planned</span></td></tr>
+      <tr><td>SC-02</td><td><span class="cn">高速前车切入 (Cut-in)</span><span class="en">Highway Cut-in</span></td><td><span class="tag tag-both">JAMA+CN</span></td><td>SOTIF</td><td><span class="status-wip">Planned</span></td></tr>
+      <tr><td>SC-03</td><td><span class="cn">高速前车急刹</span><span class="en">Highway Lead Vehicle Braking</span></td><td><span class="tag tag-both">JAMA+CN</span></td><td>FuSa+SOTIF</td><td><span class="status-wip">Planned</span></td></tr>
+      <tr><td>SC-04</td><td><span class="cn">匝道合流</span><span class="en">Ramp Merge</span></td><td><span class="tag tag-jama">JAMA V4.0</span></td><td>SOTIF</td><td><span class="status-wip">Planned</span></td></tr>
+      <tr><td>SC-05</td><td><span class="cn">匝道分流</span><span class="en">Ramp Diverge</span></td><td><span class="tag tag-jama">JAMA V4.0</span></td><td>SOTIF</td><td><span class="status-wip">Planned</span></td></tr>
+      <tr><td>SC-06</td><td><span class="cn">行人横穿 (AEB)</span><span class="en">Pedestrian Crossing (AEB)</span></td><td><span class="tag tag-both">JAMA+CN</span></td><td>FuSa</td><td><span class="status-wip">Planned</span></td></tr>
+      <tr><td>SC-07</td><td><span class="cn">非机动车混行</span><span class="en">Mixed Non-motorized Traffic</span></td><td><span class="tag tag-cn">China</span></td><td>SOTIF</td><td><span class="status-wip">Planned</span></td></tr>
+      <tr><td>SC-08</td><td><span class="cn">施工区变道</span><span class="en">Construction Zone Lane Change</span></td><td><span class="tag tag-both">JAMA+CN</span></td><td>SOTIF</td><td><span class="status-wip">Planned</span></td></tr>
+      <tr><td>SC-09</td><td><span class="cn">泊车入库（垂直）</span><span class="en">Perpendicular Parking</span></td><td><span class="tag tag-cn">China GB 44496</span></td><td>FuSa</td><td><span class="status-wip">Planned</span></td></tr>
+      <tr><td>SC-10</td><td><span class="cn">隧道出入口</span><span class="en">Tunnel Entry/Exit</span></td><td><span class="tag tag-both">JAMA+CN</span></td><td>SOTIF</td><td><span class="status-wip">Planned</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:12px;font-size:0.85em;color:var(--text3);">
+    <span class="cn">完整场景库包含 50+ 场景，覆盖 JAMA V4.0 Annex A-D 全部场景类型 + 中国强制标准测试场景。</span>
+    <span class="en">Full library contains 50+ scenarios covering all JAMA V4.0 Annex A-D types + Chinese mandatory test scenarios.</span>
+  </p>
+</section>
+
+<!-- Roadmap -->
+<section>
+  <h2 class="sec-title cn">路线图</h2>
+  <h2 class="sec-title en">Roadmap</h2>
+  <div class="roadmap">
+    <div class="rm-item rm-done">
+      <div class="rm-phase">Phase 1</div>
+      <div class="rm-content">
+        <h4><span class="cn">安全知识引擎</span><span class="en">Safety Knowledge Engine</span></h4>
+        <p class="cn">SOTIF深度技能 + 中国标准覆盖 + 三合一安全分析模板</p>
+        <p class="en">Deep SOTIF skills + China standards + Safety Trinity analysis templates</p>
+        <span class="rm-status status-wip">In Progress</span>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-phase">Phase 2</div>
+      <div class="rm-content">
+        <h4><span class="cn">场景库 + DFM数据引擎</span><span class="en">Scenario Library + DFM Data Engine</span></h4>
+        <p class="cn">JAMA V4.0 × 中国标准场景库 + 20核心场景行为基线（DRIVEResearch数据注入）</p>
+        <p class="en">JAMA V4.0 x China scenarios + 20 core scenario behavioral baselines (DRIVEResearch data)</p>
+        <span class="rm-status status-plan">Planned</span>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-phase">Phase 3</div>
+      <div class="rm-content">
+        <h4><span class="cn">场景生成与工具集成</span><span class="en">Scenario Generation & Tool Integration</span></h4>
+        <p class="cn">OpenSCENARIO场景自动生成 + 仿真平台对接 + 商业化工具包</p>
+        <p class="en">OpenSCENARIO generation + simulation platform integration + commercial toolkit</p>
+        <span class="rm-status status-plan">Planned</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section>
+  <h2 class="sec-title cn">关于作者</h2>
+  <h2 class="sec-title en">About</h2>
+  <div class="card" style="max-width:600px;">
+    <h3>Yuxin Zhang (张玉新)</h3>
+    <p class="cn" style="margin-top:8px;">吉林大学汽车工程学院副教授 / 自动驾驶安全联合实验室主任<br>卓驭科技（原DJI汽车）功能安全负责人<br><a href="https://www.driveresearch.tech/">驭研科技 DRIVEResearch</a> 创始人<br>英国纽卡斯尔大学访问学者<br><br>研究方向：预期功能安全 (SOTIF)、功能安全 (ISO 26262)、场景驱动测试评价</p>
+    <p class="en" style="margin-top:8px;">Associate Professor, Jilin University<br>Functional Safety Lead, ZHUOYU Technology (formerly DJI Automotive)<br>Founder, <a href="https://www.driveresearch.tech/">DRIVEResearch</a><br>Visiting Scholar, Newcastle University, UK<br><br>Research: SOTIF, Functional Safety, Scenario-driven V&V</p>
+    <div style="margin-top:16px; display:flex; gap:12px;">
+      <a href="https://github.com/AutoZYX" class="btn btn-primary" style="padding:8px 18px; font-size:0.9em;">GitHub</a>
+      <a href="https://www.linkedin.com/in/yuxin-zhang-autozyx/" class="btn" style="padding:8px 18px; font-size:0.9em; border:1.5px solid var(--border); color:var(--text);">LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="author">ADSafetyPilot</div>
+  <p>
+    <span class="cn">MIT 协议开源 · 由 <a href="https://github.com/AutoZYX">Yuxin Zhang</a> 构建</span>
+    <span class="en">MIT License · Built by <a href="https://github.com/AutoZYX">Yuxin Zhang</a></span>
+  </p>
+  <p style="margin-top:8px;">
+    <span class="cn">通用汽车工程能力请访问 <a href="https://github.com/theja0473/automotive-claude-code-agents">Automotive Claude Code Agents</a></span>
+    <span class="en">For general automotive engineering, see <a href="https://github.com/theja0473/automotive-claude-code-agents">Automotive Claude Code Agents</a></span>
+  </p>
+</footer>
+
+</body>
+</html>
