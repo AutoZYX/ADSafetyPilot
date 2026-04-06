@@ -1,0 +1,248 @@
+# Chinese L2 ADAS Mandatory Standard — Test Scenarios
+# Source: GB XXXXX 智能网联汽车 组合驾驶辅助系统安全要求 (征求意见稿 2024-09)
+# These are MANDATORY test scenarios for Chinese market L2 ADAS certification
+
+metadata:
+  standard: "GB XXXXX — 智能网联汽车 组合驾驶辅助系统安全要求"
+  version: "公开征求意见稿 2024-09-10"
+  type: mandatory_national_standard
+  applies_to: L2_combined_driving_assistance
+  functions_covered: [ACC, AEB, LKA, LDW, BSW, RCTA, LCA]
+
+scenarios:
+  # === 7.2 Longitudinal Control (纵向控制) ===
+  - id: CN-L2-LC-001
+    name_cn: ACC稳态跟车
+    name_en: ACC steady-state car following
+    clause: "7.2.x"
+    function: ACC
+    road_type: highway_straight
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      lead_speed: {value: "constant", unit: km/h}
+      initial_THW: {min: 1.0, max: 3.0, unit: s}
+    pass_criteria: "Maintain safe following distance without collision"
+    jama_mapping: JAMA-SC-001
+
+  - id: CN-L2-LC-002
+    name_cn: 前车减速响应
+    name_en: Lead vehicle deceleration response
+    clause: "7.2.x"
+    function: ACC
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      lead_deceleration: {min: -3, max: -6, unit: m/s2}
+    pass_criteria: "Avoid collision with lead vehicle"
+    jama_mapping: JAMA-SC-004
+
+  - id: CN-L2-LC-003
+    name_cn: 前车停车再起步
+    name_en: Lead vehicle stop and go
+    clause: "7.2.x"
+    function: ACC
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      lead_stop_duration: {min: 3, max: 30, unit: s}
+    pass_criteria: "Stop behind lead vehicle, resume when lead moves"
+    jama_mapping: null
+
+  # === 7.3 Lateral Control (横向控制) ===
+  - id: CN-L2-LAT-001
+    name_cn: 直道车道保持
+    name_en: Lane keeping on straight road
+    clause: "7.3.x"
+    function: LKA
+    road_type: highway_straight
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      lane_width: {min: 3.5, max: 3.75, unit: m}
+    pass_criteria: "Vehicle center within lane boundaries"
+    jama_mapping: null
+
+  - id: CN-L2-LAT-002
+    name_cn: 弯道车道保持
+    name_en: Lane keeping on curves
+    clause: "7.3.x"
+    function: LKA
+    road_type: highway_curve
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      curve_radius: {min: 250, max: 1000, unit: m}
+    pass_criteria: "Vehicle center within lane boundaries through curve"
+    jama_mapping: null
+
+  # === 7.4 Emergency Braking (紧急制动) ===
+  - id: CN-L2-AEB-001
+    name_cn: 前方静止车辆AEB
+    name_en: AEB for stationary vehicle (straight road)
+    clause: "7.4.x"
+    function: AEB
+    road_type: highway_straight
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      target_speed: {value: 0, unit: km/h}
+      target_position: lane_center
+    pass_criteria: "Avoid collision or reduce speed by specified amount"
+    jama_mapping: JAMA-SC-003
+
+  - id: CN-L2-AEB-002
+    name_cn: 前方移动车辆AEB
+    name_en: AEB for moving vehicle
+    clause: "7.4.x"
+    function: AEB
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      target_speed: {value: 20, unit: km/h}
+    pass_criteria: "Avoid collision or reduce speed by specified amount"
+    jama_mapping: JAMA-SC-004
+
+  - id: CN-L2-AEB-003
+    name_cn: 行人横穿AEB
+    name_en: AEB for pedestrian crossing
+    clause: "7.4.x"
+    function: AEB
+    parameters:
+      ego_speed: {min: 20, max: 60, unit: km/h}
+      pedestrian_speed: {value: 5, unit: km/h}
+      crossing_direction: perpendicular
+    pass_criteria: "Avoid collision with pedestrian"
+    jama_mapping: null
+
+  - id: CN-L2-AEB-004
+    name_cn: 骑行者AEB
+    name_en: AEB for cyclist
+    clause: "7.4.x"
+    function: AEB
+    parameters:
+      ego_speed: {min: 20, max: 60, unit: km/h}
+      cyclist_speed: {value: 15, unit: km/h}
+    pass_criteria: "Avoid collision with cyclist"
+    jama_mapping: null
+
+  # === 7.5 Complex Scenarios (综合场景) ===
+  - id: CN-L2-CS-001
+    name_cn: 前车切入
+    name_en: Cut-in scenario
+    clause: "7.5.1"
+    function: ACC
+    road_type: highway_straight
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      cut_in_speed: {min: 40, max: 80, unit: km/h}
+      lateral_speed: {min: 0.5, max: 2.0, unit: m/s}
+    pass_criteria: "Avoid collision with cut-in vehicle"
+    jama_mapping: JAMA-SC-002
+    china_specific: false
+
+  - id: CN-L2-CS-002
+    name_cn: 环岛通行
+    name_en: Roundabout navigation
+    clause: "7.5.2"
+    function: combined
+    road_type: roundabout
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      roundabout_vehicle_speed: {value: 15, unit: km/h}
+      min_approach_distance: {value: 150, unit: m}
+    pass_criteria: "Navigate roundabout without collision, exit at correct point"
+    jama_mapping: null
+    china_specific: true
+
+  - id: CN-L2-CS-003
+    name_cn: 信号灯识别与响应
+    name_en: Traffic light recognition and response
+    clause: "7.5.3"
+    function: combined
+    road_type: intersection_signalized
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      signal_change_distance: {min: 90, max: 110, unit: m}
+      yellow_duration: {value: 3, unit: s}
+      red_duration: {value: 30, unit: s}
+    pass_criteria: "Stop at red light, proceed on green"
+    jama_mapping: null
+    china_specific: true
+
+  - id: CN-L2-CS-004
+    name_cn: 弯道静止车辆探测
+    name_en: Curve stationary vehicle detection
+    clause: "7.5.4.1"
+    function: AEB
+    road_type: s_curve
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      curve_left_radius: {value: 787, unit: m}
+      curve_right_radius: {value: 374, unit: m}
+      target_position: curve_inner_lane
+      TTC_threshold_M1: {value: 1.0, unit: s}
+      TTC_threshold_other: {value: 3.0, unit: s}
+    pass_criteria: "Avoid collision; or at TTC threshold show deceleration/steering"
+    jama_mapping: null
+    china_specific: true
+
+  - id: CN-L2-CS-005
+    name_cn: 十字形交叉口冲突-车辆目标直行
+    name_en: Intersection conflict - vehicle straight crossing (ego left turn)
+    clause: "7.5.4.2"
+    function: combined
+    road_type: intersection_unsignalized
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      ego_maneuver: left_turn
+      crossing_vehicle_speed: {value: 40, unit: km/h}
+      crossing_direction: left_to_right
+      min_approach_distance: {value: 150, unit: m}
+    pass_criteria: "Avoid collision with crossing vehicle"
+    jama_mapping: null
+    china_specific: true
+
+  - id: CN-L2-CS-006
+    name_cn: 十字形交叉口冲突-车辆目标远端横穿
+    name_en: Intersection conflict - vehicle far-side crossing (ego straight)
+    clause: "7.5.4.3"
+    function: combined
+    road_type: intersection_unsignalized
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      ego_maneuver: straight
+      crossing_vehicle_speed: {value: 40, unit: km/h}
+      crossing_direction: left_to_right
+    pass_criteria: "Avoid collision with crossing vehicle"
+    jama_mapping: null
+    china_specific: true
+
+  - id: CN-L2-CS-007
+    name_cn: 前方静止车辆+对向移动车辆
+    name_en: Stationary vehicle ahead with oncoming traffic
+    clause: "7.5.4.4"
+    function: combined
+    road_type: bidirectional_single_lane
+    parameters:
+      ego_speed: {value: "Vsmaxset", unit: km/h}
+      stationary_target: lane_center_offset
+      oncoming_speed: {value: 40, unit: km/h}
+      min_approach_distance: {value: 200, unit: m}
+      TTC_threshold_M1: {value: 1.0, unit: s}
+      TTC_threshold_other: {value: 3.0, unit: s}
+    pass_criteria: "Avoid collision with both stationary and oncoming vehicles"
+    jama_mapping: null
+    china_specific: true
+
+  - id: CN-L2-CS-008
+    name_cn: 换道后摩托车探测
+    name_en: Motorcycle detection after lane change
+    clause: "7.5.5"
+    function: combined
+    parameters:
+      ego_speed: {value: "V'smaxset", unit: km/h}
+      motorcycle_position: stationary_lane_center
+      trigger: driver_initiated_lane_change
+    pass_criteria: "Detect and respond to motorcycle after lane change"
+    jama_mapping: null
+    china_specific: true
+
+# Cross-reference summary
+cross_reference:
+  jama_mapped: 4  # CN-L2-LC-001, LC-002, AEB-001, CS-001
+  china_only: 8   # Roundabout, traffic light, curve, intersection, motorcycle, etc.
+  total_scenarios: 12  # Subset shown; full standard has ~30+ test scenarios

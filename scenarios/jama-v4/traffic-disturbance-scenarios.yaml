@@ -1,0 +1,188 @@
+# JAMA V4.0 Traffic Disturbance Scenarios
+# Source: SAKURA Framework V4.0, Section 3.4, Chapter 5
+# Total: 58 scenario types (subset shown with key scenarios)
+
+metadata:
+  framework: JAMA SAKURA V4.0
+  version: "4.0"
+  total_scenario_types: 58
+  classification_dimensions:
+    - road_geometry  # 道路几何
+    - ego_behavior   # 自车行为
+    - other_vehicle_position  # 他车位置
+    - other_vehicle_behavior  # 他车行为
+
+# Annex C: Avoidance Motion Scenarios (回避运动场景)
+avoidance_triggers:
+  - id: C-T1
+    ego_state: lane_keeping
+    ego_state_cn: 车道保持
+    trigger: front_side_approach
+    trigger_cn: 前方/侧方逼近
+    description: Lead vehicle deceleration or side-front vehicle cut-in
+    sub_types:
+      - lead_vehicle_deceleration  # 前车减速
+      - side_front_cut_in          # 侧前方切入
+
+  - id: C-T2
+    ego_state: lane_change
+    ego_state_cn: 变道中
+    trigger: target_lane_approach
+    trigger_cn: 目标车道逼近
+    description: Cut-in vehicle appears in target lane during ego lane change
+
+road_environments:
+  - id: C-R1
+    type: main_lane
+    type_cn: 主车道
+  - id: C-R2
+    type: merging_lane
+    type_cn: 汇入车道
+  - id: C-R3
+    type: diverging_lane
+    type_cn: 分流车道
+  - id: C-R4
+    type: ramp
+    type_cn: 匝道
+
+# Key Concrete Scenarios with Parameters
+scenarios:
+  # --- Highway Following ---
+  - id: JAMA-SC-001
+    name_en: Steady-state car following
+    name_cn: 高速稳态跟车
+    category: traffic_disturbance
+    road_type: highway
+    ego_behavior: lane_keeping
+    other_behavior: same_direction_constant_speed
+    parameters:
+      ego_speed: {min: 60, max: 120, unit: km/h}
+      relative_speed: {min: -10, max: 10, unit: km/h}
+      THW: {min: 0.5, max: 4.0, unit: s}
+    safety_domain: [FuSa, SOTIF]
+    china_standard_mapping: ["L2-ADAS-SC-ACC-01"]
+
+  # --- Cut-in ---
+  - id: JAMA-SC-002
+    name_en: Highway cut-in (front vehicle enters ego lane)
+    name_cn: 高速前车切入
+    category: traffic_disturbance
+    road_type: highway
+    ego_behavior: lane_keeping
+    other_behavior: lane_change_into_ego_lane
+    parameters:
+      ego_speed: {symbol: Ve0, min: 60, max: 120, unit: km/h}
+      other_speed: {symbol: Vo0, min: 40, max: 120, unit: km/h}
+      longitudinal_distance: {symbol: dx0, min: 5, max: 80, unit: m}
+      lateral_speed: {symbol: Vy, min: 0.5, max: 3.0, unit: m/s}
+    preventability_boundary: true  # Figure 114
+    safety_domain: [SOTIF]
+    china_standard_mapping: ["L2-ADAS-SC-ACC-02", "L2-ADAS-SC-AEB-03"]
+
+  # --- Cut-out ---
+  - id: JAMA-SC-003
+    name_en: Highway cut-out (front vehicle leaves, reveals stopped vehicle)
+    name_cn: 高速前车切出（暴露静止车辆）
+    category: traffic_disturbance
+    road_type: highway
+    ego_behavior: lane_keeping
+    other_behavior: lane_change_out_of_ego_lane
+    parameters:
+      ego_speed: {min: 60, max: 120, unit: km/h}
+      revealed_object_speed: {value: 0, unit: km/h}
+      detection_distance: {min: 20, max: 120, unit: m}
+    preventability_boundary: true  # Figure 115
+    safety_domain: [SOTIF, FuSa]
+    china_standard_mapping: ["L2-ADAS-SC-AEB-04"]
+
+  # --- Lead Vehicle Deceleration ---
+  - id: JAMA-SC-004
+    name_en: Lead vehicle sudden braking
+    name_cn: 前车急刹
+    category: traffic_disturbance
+    road_type: highway
+    ego_behavior: lane_keeping
+    other_behavior: same_direction_deceleration
+    parameters:
+      ego_speed: {min: 60, max: 120, unit: km/h}
+      lead_deceleration: {min: -3, max: -9, unit: m/s2}
+      initial_THW: {min: 0.8, max: 3.0, unit: s}
+    preventability_boundary: true  # Figure 116
+    safety_domain: [FuSa, SOTIF]
+    china_standard_mapping: ["L2-ADAS-SC-ACC-03", "L2-ADAS-SC-AEB-01"]
+
+  # --- Ramp Merge ---
+  - id: JAMA-SC-005
+    name_en: Ramp merge (on-ramp to highway)
+    name_cn: 匝道合流
+    category: traffic_disturbance
+    road_type: ramp_merge
+    road_env: C-R2
+    ego_behavior: lane_change
+    other_behavior: same_direction_constant_speed
+    parameters:
+      ego_speed: {min: 40, max: 80, unit: km/h}
+      mainline_speed: {min: 80, max: 120, unit: km/h}
+      merge_gap: {min: 10, max: 60, unit: m}
+    safety_domain: [SOTIF]
+    china_standard_mapping: []
+
+  # --- Ramp Diverge ---
+  - id: JAMA-SC-006
+    name_en: Ramp diverge (highway to off-ramp)
+    name_cn: 匝道分流
+    category: traffic_disturbance
+    road_type: ramp_diverge
+    road_env: C-R3
+    ego_behavior: lane_change
+    other_behavior: same_direction_deceleration
+    parameters:
+      ego_speed: {min: 60, max: 100, unit: km/h}
+      deceleration_rate: {min: -1, max: -4, unit: m/s2}
+    safety_domain: [SOTIF]
+    china_standard_mapping: []
+
+  # --- Multi-vehicle Avoidance (Annex C) ---
+  - id: JAMA-SC-007
+    name_en: Avoidance motion with occupied cells
+    name_cn: 回避运动（回避空间有车）
+    category: avoidance_motion
+    road_type: highway
+    ego_behavior: evasive_maneuver
+    grid_model:
+      total_cells: 5
+      theoretical_patterns: 32
+      common_patterns: "5-8 (data-driven)"
+    parameters:
+      ego_speed: {min: 60, max: 120, unit: km/h}
+      trigger_TTC: {min: 0.5, max: 4.0, unit: s}
+    safety_domain: [SOTIF]
+    china_standard_mapping: []
+
+# Perception Disturbance Scenarios (Annex E)
+perception_disturbances:
+  radar:
+    - {id: E-R1, type: target_rcs_difference, type_cn: 目标信号强度差异}
+    - {id: E-R2, type: low_du_road_multipath, type_cn: 低D/U比-路面多径}
+    - {id: E-R3, type: low_du_elevation_angle, type_cn: 低D/U比-仰角变化}
+    - {id: E-R4, type: low_sn_vehicle_orientation, type_cn: 低S/N-车辆朝向}
+    - {id: E-R5, type: low_du_buildings, type_cn: 低D/U-建筑物}
+  lidar:
+    - {id: E-L1, type: target_signal_attenuation, type_cn: 目标信号衰减}
+    - {id: E-L2, type: noise, type_cn: 噪声}
+    - {id: E-L3, type: non_target_reflection, type_cn: 非识别目标反射信号}
+  camera:
+    - {id: E-C1, type: occlusion_truncation, type_cn: 遮挡}
+    - {id: E-C2, type: spatial_frequency_contrast_reduction, type_cn: 空间频率与对比度降低}
+    - {id: E-C3, type: saturation_overexposure, type_cn: 饱和与过曝}
+
+# Accident Validation (Annex D)
+accident_validation:
+  databases:
+    - {name: GIDAS, country: Germany, scale: "7,567 highway accidents", coverage: "~90%"}
+    - {name: NHTSA, country: USA, scale: "37 types", coverage: "6/16 highway types"}
+    - {name: ITARDA, country: Japan, scale: "633,639 accidents", coverage: "99.89%"}
+  itarda_high_frequency:
+    - {combination: "Non-intersection + Straight + Same-direction", accidents: 481000}
+    - {combination: "Intersection + Straight + Cross-direction", accidents: 215000}
+    - {combination: "Intersection + Turn + Cross-direction turn", accidents: 49000}
